@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vector_read_removal"
+version = "0.1.0"
+description = "Remove paired-end reads aligning to a reference within an edit-distance threshold using minimap2"
+readme = "README.md"
+authors = [
+  { name = "Your Name", email = "you@example.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+  "pysam>=0.22.0",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourname/vector_read_removal"
+Issues = "https://github.com/yourname/vector_read_removal/issues"
+
+[project.scripts]
+vrr = "vector_read_removal.vrr_cli:main"
