@@ -44,11 +44,10 @@ With `--gzip-output`:
 * `-r/--ref` Reference FASTA
 * `-o/--out-prefix` Output prefix
 * `-t/--threads` Threads for minimap2 (default: all available)
-* `--nm-threshold` NM edit distance cutoff (default: 2)
+* `--nm-threshold` NM edit distance cutoff (default: 4)
 * `--minimap2` Path or name of minimap2 executable (default: minimap2)
 * `--extra-mm2-args` Extra minimap2 args (quoted string), e.g. `"-x sr"` (already defaulted)
 * `--tmp-dir` Temporary directory to use
-* `--keep-either` Keep pair if EITHER mate fails the threshold (default keeps pair only if BOTH mates fail)
 * `--gzip-output` Write outputs as `.fastq.gz` (default writes uncompressed `.fastq`)
 * `--gzip-level` Gzip compression level for outputs (default: 6)
 * `--log-level` Logging verbosity (DEBUG/INFO/WARNING/ERROR)
@@ -56,7 +55,7 @@ With `--gzip-output`:
 ## Behavior
 * Aligns paired FASTQs to the reference with minimap2 (`-a -x sr`).
 * Computes minimal `NM` (edit distance) per read from SAM records (primary/secondary included).
-* Drops a mate if minimal `NM <= threshold` (i.e., close match to reference). Default keeps a pair only if both mates are NOT dropped.
+* Drops the pair if either mate has minimal `NM <= threshold` (i.e., close match to reference). Otherwise, keeps the pair.
 * Unmapped reads (no alignments) are kept.
 
 ## Example

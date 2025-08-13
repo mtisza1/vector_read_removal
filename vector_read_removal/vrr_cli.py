@@ -39,7 +39,7 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
 
     opt = p.add_argument_group("Options")
     opt.add_argument("-t", "--threads", type=int, default=None, help="Threads for minimap2")
-    opt.add_argument("--nm-threshold", type=positive_int, default=2, help="NM edit distance cutoff")
+    opt.add_argument("--nm-threshold", type=positive_int, default=4, help="NM edit distance cutoff")
     opt.add_argument("--minimap2", default="minimap2", help="Path or name of minimap2 executable")
     opt.add_argument(
         "--extra-mm2-args",
@@ -47,13 +47,6 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
         help="Extra arguments to pass to minimap2 (quoted string)",
     )
     opt.add_argument("--tmp-dir", default=None, help="Temporary directory to use")
-    opt.add_argument(
-        "--keep-either",
-        action="store_true",
-        help=(
-            "Keep pair if EITHER mate fails threshold (default keeps only if BOTH mates fail threshold)."
-        ),
-    )
     opt.add_argument(
         "--gzip-output",
         action="store_true",
@@ -99,7 +92,6 @@ def main(argv: Optional[list] = None) -> int:
             minimap2=args.minimap2,
             extra_mm2_args=args.extra_mm2_args,
             tmp_dir=args.tmp_dir,
-            keep_either=args.keep_either,
             gzip_output=args.gzip_output,
             gzip_level=args.gzip_level,
             logger=logging.getLogger("vector_read_removal"),

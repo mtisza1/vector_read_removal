@@ -58,12 +58,11 @@ def run_filter(
     r2_path: str,
     ref_fasta: str,
     out_prefix: str,
-    nm_threshold: int = 2,
+    nm_threshold: int = 4,
     threads: Optional[int] = None,
     minimap2: str = "minimap2",
     extra_mm2_args: Optional[str] = None,
     tmp_dir: Optional[str] = None,
-    keep_either: bool = False,
     gzip_output: bool = False,
     gzip_level: int = 6,
     logger: Optional[logging.Logger] = None,
@@ -171,11 +170,9 @@ def run_filter(
                 name1 = rec1.name
                 name2 = rec2.name
 
-                # Default: keep only if both mates are NOT in drop sets
-                if keep_either:
-                    keep = (name1 not in drop_r1) or (name2 not in drop_r2)
-                else:
-                    keep = (name1 not in drop_r1) and (name2 not in drop_r2)
+                # Keep only if both mates are NOT in drop sets
+                # (i.e., drop the pair if either mate aligns within the NM threshold)
+                keep = (name1 not in drop_r1) and (name2 not in drop_r2)
 
                 if keep:
                     kept_pairs += 1
