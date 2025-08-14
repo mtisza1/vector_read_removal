@@ -50,6 +50,7 @@ With `--gzip-output`:
 * `--tmp-dir` Temporary directory to use
 * `--gzip-output` Write outputs as `.fastq.gz` (default writes uncompressed `.fastq`)
 * `--gzip-level` Gzip compression level for outputs (default: 6)
+* `--log` Path to log file (default: `<out_prefix>.log`)
 * `--log-level` Logging verbosity (DEBUG/INFO/WARNING/ERROR)
 
 ## Behavior

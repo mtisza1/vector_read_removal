@@ -204,11 +204,6 @@ def run_filter(
             "runtime_sec": round(time.time() - start_t, 3),
         }
 
-        logger.info(
-            "Done. total_pairs=%d kept=%d dropped=%d runtime=%.3fs",
-            total_pairs, kept_pairs, dropped_pairs, stats["runtime_sec"]
-        )
-
         return out_r1, out_r2, stats
 
     finally:

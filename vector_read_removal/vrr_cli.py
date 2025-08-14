@@ -53,6 +53,11 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
         help="Write outputs as .fastq.gz (default writes uncompressed .fastq)",
     )
     opt.add_argument("--gzip-level", type=int, default=6, help="Compression level for outputs")
+    opt.add_argument(
+        "--log",
+        default=None,
+        help="Path to log file (default: <out_prefix>.log)",
+    )
 
     log = p.add_argument_group("Logging")
     log.add_argument(
@@ -71,8 +76,31 @@ essential_files = ("r1", "r2", "ref")
 def main(argv: Optional[list] = None) -> int:
     args = parse_args(argv)
 
-    logging.basicConfig(level=getattr(logging, args.log_level), format="[%(levelname)s] %(message)s")
-    logger = logging.getLogger("vrr_cli")
+    # Configure logging: console + file (default file path is <out_prefix>.log)
+    log_level = getattr(logging, args.log_level)
+    log_path = args.log if args.log else f"{args.out_prefix}.log"
+
+    # Ensure parent directory exists if user provided a path with directories
+    log_dir = os.path.dirname(log_path)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+
+    fmt = logging.Formatter("[%(levelname)s] %(message)s")
+
+    app_logger = logging.getLogger("vector_read_removal")
+    cli_logger = logging.getLogger("vrr_cli")
+    for lg in (app_logger, cli_logger):
+        lg.handlers.clear()
+        lg.setLevel(log_level)
+        ch = logging.StreamHandler()
+        ch.setLevel(log_level)
+        ch.setFormatter(fmt)
+        lg.addHandler(ch)
+        fh = logging.FileHandler(log_path)
+        fh.setLevel(log_level)
+        fh.setFormatter(fmt)
+        lg.addHandler(fh)
+    logger = cli_logger
 
     # Basic input checks
     for key in ("r1", "r2", "ref"):
@@ -110,6 +138,8 @@ def main(argv: Optional[list] = None) -> int:
         stats.get("nm_threshold", 0),
         stats.get("runtime_sec", 0.0),
     )
+
+    logger.info("Log file: %s", log_path)
 
     return 0
 
