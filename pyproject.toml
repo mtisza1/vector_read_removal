@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vector_read_removal"
-version = "0.1.0"
+version = "0.1.1"
 description = "Remove paired-end reads aligning to a reference within an edit-distance threshold using minimap2"
 readme = "README.md"
 authors = [
