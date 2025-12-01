@@ -1,3 +1,4 @@
+import csv
 import gzip
 import contextlib
 import logging
@@ -7,9 +8,13 @@ import shutil
 import subprocess
 import tempfile
 import time
-from typing import Dict, Optional, Tuple
+from collections import Counter
+from typing import Dict, Optional, Tuple, Union
 
 import pysam
+
+
+StatsDict = Dict[str, Union[int, float, str]]
 
 
 def _check_minimap2(minimap2: str) -> str:
@@ -66,7 +71,7 @@ def run_filter(
     gzip_output: bool = False,
     gzip_level: int = 6,
     logger: Optional[logging.Logger] = None,
-) -> Tuple[str, str, Dict[str, int]]:
+) -> Tuple[str, str, StatsDict]:
     """
     Align paired FASTQ reads against a reference with minimap2 and keep pairs that do not
     align within the NM edit distance threshold.
@@ -111,12 +116,17 @@ def run_filter(
         # Parse SAM and collect minimal NM per read for R1 and R2
         min_nm_r1: Dict[str, int] = {}
         min_nm_r2: Dict[str, int] = {}
+        primary_counts: Counter[str] = Counter()
         total_sam_records = 0
         with pysam.AlignmentFile(sam_path, "r") as sam:
             for aln in sam:
                 total_sam_records += 1
                 if aln.is_unmapped:
                     continue
+                if not aln.is_secondary and not aln.is_supplementary:
+                    ref_name = aln.reference_name
+                    if ref_name:
+                        primary_counts[ref_name] += 1
                 try:
                     nm = aln.get_tag("NM")
                 except KeyError:
@@ -134,6 +144,26 @@ def run_filter(
                 else:
                     # In rare cases, orientation flags might not indicate read1/read2; ignore
                     continue
+
+        # Write primary-alignment counts CSV (always emit header for easy parsing)
+        primary_csv_path = f"{out_prefix}_primary_alignments.csv"
+        with open(primary_csv_path, "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["reference_name", "primary_alignment_count"])
+            for ref_name, count in sorted(primary_counts.items()):
+                writer.writerow([ref_name, count])
+
+        if primary_counts:
+            logger.info(
+                "Primary alignment counts written to %s (references=%d)",
+                primary_csv_path,
+                len(primary_counts),
+            )
+        else:
+            logger.info(
+                "Primary alignment counts written to %s (no primary alignments detected)",
+                primary_csv_path,
+            )
 
         drop_r1 = {n for n, nm in min_nm_r1.items() if nm <= nm_threshold}
         drop_r2 = {n for n, nm in min_nm_r2.items() if nm <= nm_threshold}
@@ -194,7 +224,7 @@ def run_filter(
                 else:
                     dropped_pairs += 1
 
-        stats = {
+        stats: StatsDict = {
             "total_pairs": total_pairs,
             "kept_pairs": kept_pairs,
             "dropped_pairs": dropped_pairs,
@@ -202,6 +232,7 @@ def run_filter(
             "threads": threads,
             "total_sam_records": total_sam_records,
             "runtime_sec": round(time.time() - start_t, 3),
+            "primary_alignment_csv": primary_csv_path,
         }
 
         return out_r1, out_r2, stats

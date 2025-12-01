@@ -33,6 +33,7 @@ vrr -1 reads_R1.fastq.gz -2 reads_R2.fastq.gz -r reference.fasta -o filtered \
 This produces by default:
 * `filtered_R1.fastq`
 * `filtered_R2.fastq`
+* `filtered_primary_alignments.csv`
 
 With `--gzip-output`:
 * `filtered_R1.fastq.gz`
@@ -52,6 +53,8 @@ With `--gzip-output`:
 * `--gzip-level` Gzip compression level for outputs (default: 6)
 * `--log` Path to log file (default: `<out_prefix>.log`)
 * `--log-level` Logging verbosity (DEBUG/INFO/WARNING/ERROR)
+
+Each run also writes `<out_prefix>_primary_alignments.csv`, containing the number of primary alignments observed for every reference sequence with at least one primary hit.
 
 ## Behavior
 * Aligns paired FASTQs to the reference with minimap2 (`-a -x sr`).
